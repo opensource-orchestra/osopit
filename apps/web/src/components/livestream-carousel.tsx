@@ -81,7 +81,6 @@ export function LivestreamCarousel({ broadcasts }: LivestreamCarouselProps) {
         </CarouselContent>
       </Carousel>
 
-      {/* Navigation Dots */}
       {broadcasts.length > 1 && (
         <div className="mt-6 flex justify-center gap-2">
           {broadcasts.map((broadcast, index) => (

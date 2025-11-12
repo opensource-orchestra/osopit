@@ -1,7 +1,7 @@
 "use client";
 
 import { Cuer } from "cuer";
-import { CheckCheck, Copy } from "lucide-react";
+import { CheckCheck, ChevronDown, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useSendTip } from "@/hooks/use-send-tip";
@@ -50,6 +50,7 @@ function DonationContent({
   const [amount, setAmount] = useState("0.01");
   const [customAmount, setCustomAmount] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showWalletAddress, setShowWalletAddress] = useState(false);
   const { mutate, isPending } = useSendTip();
 
   const selectedAmount = customAmount || amount;
@@ -76,7 +77,7 @@ function DonationContent({
     `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   return (
-    <div className="w-80">
+    <div className="">
       <div className="mb-4">
         <h3 className="mb-2 font-bold text-lg">
           Send a Gift to {artistEnsName}
@@ -84,24 +85,48 @@ function DonationContent({
       </div>
 
       {walletAddress && (
-        <div className="mb-6 rounded-lg border border-border bg-card/50 p-4">
-          <Label className="mb-2 block">Artist Wallet Address</Label>
-          <div className="mb-4 flex items-center gap-2">
-            <code className="flex-1 rounded bg-muted px-3 py-2 font-mono text-foreground text-sm">
-              {truncateAddress(walletAddress)}
-            </code>
-            <Button onClick={handleCopyAddress} size="sm" variant="outline">
-              {copied ? (
-                <CheckCheck className="h-4 w-4" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-          <div className="flex justify-center">
-            {/* Keep bg-white for QR code - required for reliable scanning */}
-            <div className="rounded-lg bg-white p-3">
-              <Cuer color="black" size={180} value={walletAddress} />
+        <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card/50">
+          <Button
+            className="w-full justify-between rounded-none border-0 border-border border-b bg-transparent hover:bg-card/70"
+            onClick={() => setShowWalletAddress(!showWalletAddress)}
+            variant="outline"
+          >
+            <span className="font-medium text-foreground text-sm">
+              Artist Wallet Address
+            </span>
+            <div
+              className={`transition-transform duration-300 ${
+                showWalletAddress ? "rotate-180" : ""
+              }`}
+            >
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </Button>
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+              showWalletAddress
+                ? "max-h-[500px] opacity-100"
+                : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="p-4">
+              <div className="mb-4 flex items-center gap-2">
+                <code className="flex-1 rounded bg-muted px-3 py-2 font-mono text-foreground text-sm">
+                  {truncateAddress(walletAddress)}
+                </code>
+                <Button onClick={handleCopyAddress} size="sm" variant="outline">
+                  {copied ? (
+                    <CheckCheck className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <div className="flex justify-center">
+                <div className="rounded-lg bg-white p-3">
+                  <Cuer color="black" size={180} value={walletAddress} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

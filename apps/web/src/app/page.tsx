@@ -27,13 +27,11 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-// Type-safe filter parser for nuqs
 const filterParser = parseAsStringLiteral(FILTER_OPTIONS);
 
 export default function Home() {
   const { data: allArtists, isLoading } = useAllArtists();
 
-  // URL state management with nuqs - single source of truth
   const [filter, setFilter] = useQueryState(
     "filter",
     filterParser.withDefault("all")
@@ -44,14 +42,12 @@ export default function Home() {
     throttleMs: 300, // Built-in debouncing!
   });
 
-  // Calculate stats
   const liveArtists =
     allArtists?.filter((a) => a.activeBroadcast?.isLive) || [];
   const totalArtists = allArtists?.length || 0;
   const liveCount = liveArtists.length;
   const offlineCount = totalArtists - liveCount;
 
-  // Filter artists based on search and filter
   const filteredArtists =
     allArtists?.filter((artist) => {
       const matchesSearch = artist.subdomain?.name
@@ -102,7 +98,6 @@ export default function Home() {
     );
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -117,7 +112,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Skip to content link for keyboard users */}
       <a
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-brand focus:px-4 focus:py-2 focus:text-brand-foreground focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
         href="#artist-grid"
@@ -128,7 +122,6 @@ export default function Home() {
       <section className="mx-auto w-full bg-background px-4 py-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-6">
           <div className="flex flex-1 flex-col gap-6">
-            {/* Hero Section: Live Streams */}
             {liveArtists.length > 0 && (
               <div className="w-full rounded-lg border border-border bg-card p-6 shadow-lg">
                 <div className="mb-4 flex items-center gap-2">
@@ -151,7 +144,6 @@ export default function Home() {
                 Artists
               </h2>
 
-              {/* Sticky Filter Bar */}
               <StickyFilterBar
                 filter={filter}
                 liveCount={liveCount}
@@ -162,7 +154,6 @@ export default function Home() {
                 totalArtists={totalArtists}
               />
 
-              {/* Artist Grid Section */}
               <div className="mx-auto w-full px-4" id="artist-grid">
                 {filteredArtists.length === 0 && renderEmptyState()}
                 {filteredArtists.length > 0 && (

@@ -58,7 +58,7 @@ function ArtistPreviewContent({ ensName }: { ensName: string }) {
   );
 
   return (
-    <div className="w-72">
+    <>
       <div className="mb-4 flex items-center gap-3">
         <ArtistAvatar
           avatarUrl={avatar}
@@ -97,7 +97,7 @@ function ArtistPreviewContent({ ensName }: { ensName: string }) {
           </Button>
         </DonationPopover>
       </div>
-    </div>
+    </>
   );
 }
 
