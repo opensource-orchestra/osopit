@@ -11,6 +11,10 @@ dataSources:
       abi: OsopitRegistry
       address: "0xb2576cD3Cfcc023e4A48c79BaF23A8787dc372ff"
       startBlock: 38102036
+    context:
+      parentDomain:
+        type: String
+        data: "osopit.eth"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

@@ -1,6 +1,8 @@
 import { resolve } from "@/gqty";
+import { detectStreamPlatform } from "./broadcast";
 import {
   calculateNodeHash,
+  getTextRecord,
   isEthereumAddress,
   normalizeIdentifier,
   parseEnsLabel,
@@ -11,14 +13,46 @@ type TextRecord = {
   value: string;
 };
 
-type ArtistProfile = {
+export type ArtistProfile = {
   address: string;
   subdomain: {
     name: string;
     node: string;
   } | null;
   textRecords: TextRecord[];
+  // Broadcast/streaming data
+  isStreaming: boolean;
+  streamUrl?: string;
+  streamPlatform?: "youtube" | "twitch";
+  taggedArtists: string[];
 };
+
+/**
+ * Parse broadcast text record value
+ * Format: "true|url|userId1|userId2|..."
+ */
+function parseBroadcast(value: string | undefined): {
+  isLive: boolean;
+  url?: string;
+  taggedArtists?: string[];
+} {
+  if (!value) {
+    return { isLive: false };
+  }
+
+  const parts = value.split("|");
+  const isLive = parts[0] === "true";
+
+  if (!isLive) {
+    return { isLive: false };
+  }
+
+  return {
+    isLive: true,
+    url: parts[1] || undefined,
+    taggedArtists: parts.slice(2).filter(Boolean),
+  };
+}
 
 function normalizeTextRecords(
   records:
@@ -57,11 +91,25 @@ function buildArtistProfileFromUser(
   const name = subdomain?.name ?? undefined;
   const node = subdomain?.node ?? undefined;
   const textRecords = subdomain?.textRecords?.({ first: 100 });
+  const normalizedRecords = normalizeTextRecords(textRecords);
+
+  // Parse broadcast data
+  const broadcastValue = getTextRecord(
+    normalizedRecords,
+    "app.osopit.broadcast"
+  );
+  const broadcast = parseBroadcast(broadcastValue);
 
   return {
     address: user.address ?? "",
     subdomain: name && node ? { name, node } : null,
-    textRecords: normalizeTextRecords(textRecords),
+    textRecords: normalizedRecords,
+    isStreaming: broadcast.isLive,
+    streamUrl: broadcast.url,
+    streamPlatform: broadcast.url
+      ? (detectStreamPlatform(broadcast.url) ?? undefined)
+      : undefined,
+    taggedArtists: broadcast.taggedArtists ?? [],
   };
 }
 
@@ -84,11 +132,25 @@ function buildArtistProfileFromSubdomain(
   const node = subdomain.node ?? undefined;
   const ownerAddress = subdomain.owner?.address ?? "";
   const textRecords = subdomain.textRecords({ first: 100 });
+  const normalizedRecords = normalizeTextRecords(textRecords);
+
+  // Parse broadcast data
+  const broadcastValue = getTextRecord(
+    normalizedRecords,
+    "app.osopit.broadcast"
+  );
+  const broadcast = parseBroadcast(broadcastValue);
 
   return {
     address: ownerAddress,
     subdomain: name && node ? { name, node } : null,
-    textRecords: normalizeTextRecords(textRecords),
+    textRecords: normalizedRecords,
+    isStreaming: broadcast.isLive,
+    streamUrl: broadcast.url,
+    streamPlatform: broadcast.url
+      ? (detectStreamPlatform(broadcast.url) ?? undefined)
+      : undefined,
+    taggedArtists: broadcast.taggedArtists ?? [],
   };
 }
 

@@ -47,14 +47,43 @@ export default function MePage() {
   if (!isConnected) {
     return (
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-4">
-        <Card className="w-full border-border bg-background/80 p-8 text-center backdrop-blur">
-          <h1 className="mb-4 font-bold text-2xl text-foreground">
-            Your Profile
-          </h1>
-          <p className="mb-6 text-muted-foreground">
-            Connect your wallet to view and manage your profile
-          </p>
-          <PortoConnectButton />
+        <Card className="w-full border-border bg-background/80 p-8 backdrop-blur">
+          <div className="mb-6 text-center">
+            <h1 className="mb-2 font-bold text-2xl text-foreground">
+              Member Dashboard
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              For existing osopit.eth members only
+            </p>
+          </div>
+
+          <div className="mb-6 space-y-3 rounded-lg border border-border bg-background/50 p-4">
+            <p className="text-foreground text-sm">
+              <strong>New to Osopit?</strong>
+            </p>
+            <p className="text-muted-foreground text-sm">
+              You need an invitation from an existing member to create your
+              profile. Once invited, you'll receive an osopit.eth subdomain and
+              can manage your identity, go live, and receive tips.
+            </p>
+            <Link href="/">
+              <Button className="h-auto p-0 text-sm" variant="link">
+                Browse existing artists →
+              </Button>
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-center text-foreground text-sm">
+              <strong>Already have an account?</strong>
+            </p>
+            <p className="text-center text-muted-foreground text-xs">
+              Connect your Porto smart wallet to access your dashboard
+            </p>
+            <div className="flex justify-center">
+              <PortoConnectButton />
+            </div>
+          </div>
         </Card>
       </div>
     );

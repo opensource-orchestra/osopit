@@ -1,16 +1,20 @@
-"use client";
-
 import { Gift } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import { StreamEmbed } from "@/components/stream-embed";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useArtistProfile } from "@/hooks/use-artist-profile";
 import { SocialKey } from "@/lib/constants";
-import { getTextRecord, ipfsToHttp } from "@/lib/utils";
+import { getCurrentEnsEnvironment } from "@/lib/ens-environments";
+import { getArtistProfileServer } from "@/lib/get-artist-profile-server";
+import { createOgImageUrl } from "@/lib/og-utils";
+import { formatAddress, getTextRecord, ipfsToHttp } from "@/lib/utils";
+
+type PageProps = {
+  params: Promise<{ identifier: string }>;
+};
 
 const SOCIAL_ICONS: Record<SocialKey, string> = {
   "com.spotify": "🎵",
@@ -29,54 +33,85 @@ const SOCIAL_ICONS: Record<SocialKey, string> = {
   "com.reddit": "🔗",
 };
 
-export default function ArtistProfilePage() {
-  const params = useParams();
-  const identifier = params.identifier as string;
-  const { data: artist, isLoading } = useArtistProfile(identifier);
+/**
+ * Generate metadata for artist profile page
+ * Runs server-side for proper SEO and social media previews
+ */
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { identifier } = await params;
+  const profile = await getArtistProfileServer(identifier);
 
-  if (isLoading) {
-    return (
-      <div className="mx-auto w-full max-w-7xl py-12">
-        <div className="mb-8 space-y-4">
-          <Skeleton className="h-64 w-full rounded-lg border border-border bg-background/80 shadow-md" />
-          <div className="flex items-center gap-6">
-            <Skeleton className="h-32 w-32 rounded-full border border-border/30 border-dashed" />
-            <div className="flex-1 space-y-3">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-full max-w-lg" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (!profile) {
+    return {
+      title: "Artist not found - osopit",
+      description: "This artist profile doesn't exist.",
+    };
   }
 
+  const envConfig = getCurrentEnsEnvironment();
+  const displayName = profile.subdomain?.name || identifier;
+  const description = getTextRecord(profile.textRecords, "description") || "";
+  const fullDomain = profile.subdomain
+    ? `${profile.subdomain.name}.${envConfig.domain}`
+    : formatAddress(profile.address);
+
+  const ogImageUrl = createOgImageUrl("/api/og/artist", { identifier });
+
+  return {
+    title: `${displayName} - osopit`,
+    description:
+      description || `View ${displayName}'s profile on osopit - ${fullDomain}`,
+    openGraph: {
+      title: displayName,
+      description:
+        description ||
+        `Check out ${displayName}'s profile on osopit - ${fullDomain}`,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${displayName}'s profile`,
+        },
+      ],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: displayName,
+      description:
+        description ||
+        `Check out ${displayName}'s profile on osopit - ${fullDomain}`,
+      images: [ogImageUrl],
+    },
+  };
+}
+
+/**
+ * Artist profile page - server component
+ * Fetches data once and renders directly (no client wrapper)
+ */
+export default async function ArtistProfilePage({ params }: PageProps) {
+  const { identifier } = await params;
+
+  // Fetch artist data server-side
+  const artist = await getArtistProfileServer(identifier);
+
+  // Show 404 if artist not found
   if (!artist) {
-    return (
-      <div className="mx-auto w-full max-w-4xl py-16 text-center">
-        <div className="space-y-4 rounded-lg border border-border bg-background/80 p-10 shadow-md">
-          <div className="text-5xl">🤔</div>
-          <h2 className="font-black text-2xl text-foreground leading-tight">
-            Artist not found
-          </h2>
-          <p className="text-muted-foreground">
-            This artist profile doesn't exist or hasn't been created yet.
-          </p>
-          <div className="flex justify-center">
-            <Button asChild variant="outline">
-              <Link href="/">Go Home</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
-  const avatar = getTextRecord(artist.textRecords?.(), "avatar");
-  const description = getTextRecord(artist.textRecords?.(), "description");
+  // Extract profile data
+  const avatar = getTextRecord(artist.textRecords, "avatar");
+  const description = getTextRecord(artist.textRecords, "description");
+  const displayName = artist.subdomain?.name || identifier;
 
   return (
     <Container>
+      {/* Back button */}
       <Button
         asChild
         className="mb-4 px-0 text-sm hover:bg-transparent hover:opacity-60"
@@ -86,23 +121,26 @@ export default function ArtistProfilePage() {
         <Link href="/">← Back to Home</Link>
       </Button>
 
+      {/* Stream embed (client island - only if streaming) */}
       {artist.isStreaming && artist.streamUrl && artist.streamPlatform && (
         <div className="mb-8 overflow-hidden rounded-lg border border-border bg-primary/20 p-0 shadow-md">
           <StreamEmbed
-            artistName={artist.subdomain || identifier}
+            artistName={displayName}
             streamPlatform={artist.streamPlatform}
             streamUrl={artist.streamUrl}
-            taggedArtists={artist.taggedArtists || []}
-            walletAddress={artist.user?.address}
+            taggedArtists={artist.taggedArtists}
+            walletAddress={artist.address}
           />
         </div>
       )}
 
+      {/* Profile section (server-rendered) */}
       <div className="mb-8 flex flex-col gap-6 rounded-lg border border-border bg-primary/20 px-8 py-10 shadow-md md:flex-row md:items-start">
+        {/* Avatar */}
         <div className="flex-shrink-0">
           {avatar ? (
             <Image
-              alt={artist.subdomain || identifier}
+              alt={displayName}
               className={`h-32 w-32 rounded-full border-2 ${
                 artist.isStreaming ? "border-live" : "border-border"
               }`}
@@ -121,10 +159,11 @@ export default function ArtistProfilePage() {
           )}
         </div>
 
+        {/* Name, bio, and gift button */}
         <div className="flex-1 space-y-4">
           <div className="space-y-2">
             <h1 className="font-black text-4xl text-foreground leading-tight">
-              {artist.subdomain || identifier}
+              {displayName}
             </h1>
             {description && (
               <p className="text-foreground/90 text-lg leading-relaxed">
@@ -133,7 +172,7 @@ export default function ArtistProfilePage() {
             )}
           </div>
 
-          <Link href={`/${artist.subdomain || identifier}/gift`}>
+          <Link href={`/${displayName}/gift`}>
             <Button size="lg">
               <Gift className="h-3 w-3" />
             </Button>
@@ -141,14 +180,14 @@ export default function ArtistProfilePage() {
         </div>
       </div>
 
+      {/* Social links (server-rendered) */}
       <div className="rounded-lg border border-border bg-primary/20 px-4 py-6 shadow-md sm:px-8 sm:py-10">
         <h3 className="mb-4 font-black text-foreground text-xl leading-tight sm:mb-6 sm:text-2xl">
           🔗 Connect & Listen
         </h3>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {artist
-            .textRecords?.()
-            ?.filter((x) => SocialKey.safeParse(x.key).success)
+          {artist.textRecords
+            .filter((record) => SocialKey.safeParse(record.key).success)
             .map((record) => (
               <a
                 className="hover:-translate-y-0.5 flex w-full flex-nowrap items-center gap-2 rounded-lg border border-border bg-primary/20 px-3 py-2.5 shadow-sm transition-all duration-200 hover:shadow-md sm:gap-3 sm:px-4 sm:py-3"

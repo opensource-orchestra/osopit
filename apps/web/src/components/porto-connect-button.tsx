@@ -33,31 +33,76 @@ export function PortoConnectButton({
   };
 
   const formatAddress = (addr: string) =>
-    `${addr.slice(0, ADDRESS_PREFIX_LENGTH)}...${addr.slice(-ADDRESS_SUFFIX_LENGTH)}`;
+    `${addr.slice(0, ADDRESS_PREFIX_LENGTH)}...${addr.slice(
+      -ADDRESS_SUFFIX_LENGTH
+    )}`;
 
   if (isConnected && address) {
     return (
       <div className="flex items-center gap-2">
-        <Button onClick={handleCopyAddress} size={size} variant="outline">
-          {copied ? "Copied!" : formatAddress(address)}
+        <Button
+          className={`group relative overflow-hidden border-black bg-white font-mono font-semibold text-black text-xs shadow-sm transition-all hover:scale-105 hover:bg-gray-50 ${className}`}
+          onClick={handleCopyAddress}
+          size={size}
+          variant="outline"
+        >
+          <span className="relative z-10">
+            {copied ? "✓ Copied!" : formatAddress(address)}
+          </span>
         </Button>
-        <Button onClick={() => disconnect()} size={size} variant="ghost">
+        <Button
+          className="border-black bg-white font-semibold text-black text-xs shadow-sm transition-all hover:bg-gray-50"
+          onClick={() => disconnect()}
+          size={size}
+          variant="outline"
+        >
           Disconnect
         </Button>
       </div>
     );
   }
 
+  // Debug: Log available connectors
+  console.log(
+    "[PortoConnectButton] Available connectors:",
+    connectors.map((c) => ({
+      name: c.name,
+      type: c.type,
+      id: c.id,
+    }))
+  );
+
   const portoConnector = connectors.find((c) => c.name === "Porto");
 
+  console.log("[PortoConnectButton] Porto connector found:", !!portoConnector);
+  console.log("[PortoConnectButton] Porto connector details:", portoConnector);
+
   if (!portoConnector) {
-    return <div>No connector found</div>;
+    console.error(
+      "[PortoConnectButton] Porto connector not found. Available connectors:",
+      connectors.map((c) => c.name)
+    );
+    return (
+      <div className="flex flex-col gap-2">
+        <Button className={className} disabled size={size} variant="outline">
+          ⚡ Connect Wallet to Start
+        </Button>
+        <p className="text-destructive text-xs">
+          Porto connector not available. Check console for details.
+        </p>
+      </div>
+    );
   }
 
   return (
     <Button
-      className={className}
+      className={`group relative overflow-hidden border-black bg-white font-semibold text-black text-xs shadow-sm transition-all hover:scale-105 hover:bg-gray-50 ${className}`}
       onClick={() => {
+        console.log("[PortoConnectButton] Connect button clicked");
+        console.log(
+          "[PortoConnectButton] Using connector:",
+          portoConnector.name
+        );
         connect({
           connector: portoConnector,
           // @ts-expect-error - TODO: fix this
@@ -67,8 +112,18 @@ export function PortoConnectButton({
         });
       }}
       size={size}
+      variant="outline"
     >
-      {isPending ? "Connecting..." : "⚡ Connect Wallet to Start"}
+      <span className="relative z-10 flex items-center gap-2">
+        {isPending ? (
+          <>
+            <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-black/20 border-t-black" />
+            Connecting...
+          </>
+        ) : (
+          <>Sign In</>
+        )}
+      </span>
     </Button>
   );
 }

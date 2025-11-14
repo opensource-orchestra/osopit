@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { TipForm } from "@/app/[identifier]/gift/_components/tip-form";
 import { Button } from "@/components/ui/button";
 import { getArtistProfileServer } from "@/lib/get-artist-profile-server";
+import { createOgImageUrl } from "@/lib/og-utils";
 import { getTextRecord } from "@/lib/utils";
 
 type GiftPageProps = {
@@ -65,9 +66,29 @@ export async function generateMetadata({ params }: GiftPageProps) {
   }
 
   const artistName = profile.subdomain.name;
+  const ogImageUrl = createOgImageUrl("/api/og/gift", { identifier });
 
   return {
     title: `Send a tip to ${artistName}`,
     description: `Support ${artistName} with a tip on osopit`,
+    openGraph: {
+      title: `Send a tip to ${artistName}`,
+      description: `Support ${artistName} with a tip on osopit`,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `Send a tip to ${artistName}`,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Send a tip to ${artistName}`,
+      description: `Support ${artistName} with a tip on osopit`,
+      images: [ogImageUrl],
+    },
   };
 }

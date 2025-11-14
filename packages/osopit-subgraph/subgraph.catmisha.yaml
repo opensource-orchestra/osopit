@@ -11,6 +11,10 @@ dataSources:
       abi: OsopitRegistry
       address: "0x63e7b8F8A8d42b043fe58Be1243d7cBcb1Ca5514"
       startBlock: 37817657
+    context:
+      parentDomain:
+        type: String
+        data: "catmisha.eth"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

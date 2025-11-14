@@ -1,4 +1,4 @@
-import { log } from "@graphprotocol/graph-ts";
+import { log, dataSource } from "@graphprotocol/graph-ts";
 import { NameRegistered as NameRegisteredEvent } from "../generated/OsopitRegistry/OsopitRegistry";
 import { Subdomain, User } from "../generated/schema";
 import { namehash } from "./utils";
@@ -19,10 +19,16 @@ export function handleNameRegistered(event: NameRegisteredEvent): void {
     log.info("Creating new User: {}", [userId]);
   }
 
+  // Get parent domain from data source context (configured in subgraph.yaml)
+  const context = dataSource.context();
+  const parentDomain = context.getString("parentDomain");
+  
   // Calculate node hash for the subdomain
-  const fullName = `${label}.osopit.eth`;
+  const fullName = `${label}.${parentDomain}`;
   const nodeBytes = namehash(fullName);
   const nodeHash = nodeBytes.toHexString();
+  
+  log.info("Registering subdomain: {} with node hash: {}", [fullName, nodeHash]);
 
   let subdomain = Subdomain.load(nodeHash);
   if (subdomain == null) {
