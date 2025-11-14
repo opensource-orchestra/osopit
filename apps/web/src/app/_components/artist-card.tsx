@@ -18,7 +18,7 @@ export const ArtistCard = ({ artist }: ArtistCardProps) => {
     "description"
   );
   const cardClassName = [
-    "group relative flex h-full flex-col overflow-hidden rounded-lg border bg-card px-6 pb-6 pt-6 text-left shadow-sm transition-all duration-200 hover:shadow-md",
+    "group relative flex h-full flex-col overflow-hidden rounded-lg border bg-primary/20 px-6 pb-6 pt-6 text-left shadow-sm transition-all duration-200  shadow shadow-primary/50 hover:shadow-md",
     isLive ? "border-live/50 ring-2 ring-live/20" : "border-border",
   ]
     .filter(Boolean)

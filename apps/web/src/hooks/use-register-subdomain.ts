@@ -2,7 +2,12 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAccount, useCapabilities, useSendCalls } from "wagmi";
 import { L2RegistrarABI } from "@/lib/abi/l2-registrar";
-import { L2_REGISTRAR_ADDRESS } from "@/lib/contracts";
+import { ReverseRegistrarABI } from "@/lib/abi/reverse-registrar";
+import { ENS } from "@/lib/constants";
+import {
+  L2_REGISTRAR_ADDRESS,
+  REVERSE_REGISTRAR_ADDRESS,
+} from "@/lib/contracts";
 import { parseContractError } from "@/lib/parse-contract-error";
 
 type InviteData = {
@@ -53,11 +58,14 @@ export function useRegisterSubdomain() {
       }
 
       try {
-        toast.info("Registering with invite...");
+        toast.info("Registering subdomain and setting primary name...");
 
         // Check if atomic batch is supported
         const atomicBatchSupported =
           capabilities?.[chainId]?.atomicBatch?.supported;
+
+        // Construct the full ENS name
+        const fullName = `${input.label}.${ENS.PARENT_DOMAIN}`;
 
         const result = await sendCallsAsync({
           calls: [
@@ -73,6 +81,12 @@ export function useRegisterSubdomain() {
                 input.inviteData.signature as `0x${string}`,
               ],
             },
+            {
+              abi: ReverseRegistrarABI,
+              functionName: "setName",
+              to: REVERSE_REGISTRAR_ADDRESS,
+              args: [fullName],
+            },
           ],
           ...(atomicBatchSupported && {
             capabilities: {
@@ -83,7 +97,7 @@ export function useRegisterSubdomain() {
           }),
         });
 
-        toast.success("Registration initiated!");
+        toast.success("Registration complete! Primary name set.");
 
         return result;
       } catch (error) {

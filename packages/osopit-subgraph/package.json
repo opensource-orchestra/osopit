@@ -4,7 +4,11 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
+    "build:catmisha": "graph build subgraph.catmisha.yaml",
+    "build:osopit": "graph build subgraph.osopit.yaml",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ osopit-subgraphv-1",
+    "deploy:catmisha": "graph deploy --node https://api.studio.thegraph.com/deploy/ catmisha-subgraph subgraph.catmisha.yaml",
+    "deploy:osopit": "graph deploy --node https://api.studio.thegraph.com/deploy/ osopit-subgraphv-1 subgraph.osopit.yaml",
     "create-local": "graph create --node http://localhost:8020/ osopit-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ osopit-subgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 osopit-subgraph",

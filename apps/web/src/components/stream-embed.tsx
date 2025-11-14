@@ -34,7 +34,7 @@ export function StreamEmbed({
 
   return (
     <TooltipProvider>
-      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex h-full flex-col overflow-hidden rounded-none border-0 border-border bg-background/80 md:rounded-lg md:border">
         <div className="relative flex-1">
           <iframe
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -45,14 +45,14 @@ export function StreamEmbed({
           />
         </div>
         {showPlatformBadge && (
-          <div className="border-border border-t bg-card p-3 backdrop-blur">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="border-border border-t bg-background/80 px-3 py-2 backdrop-blur">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               {/* Left: Artist info + gift button */}
               {artistName && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <ArtistQuickActions ensName={artistName}>
                     <button
-                      className="flex items-center gap-2 transition-opacity hover:opacity-80"
+                      className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
                       type="button"
                     >
                       <ArtistAvatar
@@ -75,7 +75,7 @@ export function StreamEmbed({
                           <TooltipTrigger asChild>
                             <ArtistQuickActions ensName={artist}>
                               <button
-                                className={`transition-transform hover:z-10 hover:scale-110 ${index > 0 ? "-ml-2" : ""}`}
+                                className={`transition-transform hover:z-10 hover:scale-110 ${index > 0 ? "-ml-1.5" : ""}`}
                                 type="button"
                               >
                                 <ArtistAvatar

@@ -10,8 +10,11 @@ export type Transaction = {
   value: string; // Wei as string
   timestamp: number; // Unix timestamp in seconds
   blockNumber: number;
+  exchangeRate: string | null; // ETH/USD price at transaction time
+  type: "normal" | "internal"; // Transaction type
   valueETH: string; // Formatted ETH value
   valueETHNum: number; // ETH value as number
+  valueUSD: number | null; // USD value at transaction time
   direction: "incoming" | "outgoing"; // Relative to user address
 };
 
@@ -25,7 +28,7 @@ type UseTransactionHistoryResult = {
 
 /**
  * Hook to fetch transaction history for a wallet address
- * Fetches from our API route which proxies to Basescan
+ * Fetches from our API route which proxies to Blockscout
  *
  * @param address - Wallet address to fetch transactions for
  */
@@ -53,6 +56,8 @@ export function useTransactionHistory(
           value: string;
           timestamp: number;
           blockNumber: number;
+          exchangeRate: string | null;
+          type: "normal" | "internal";
         }>;
       };
 
@@ -63,7 +68,7 @@ export function useTransactionHistory(
     gcTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
-  // Process transactions to add ETH formatting and direction
+  // Process transactions to add ETH formatting, USD value, and direction
   const transactions: Transaction[] =
     data?.map((tx) => {
       const valueETH = formatEther(BigInt(tx.value));
@@ -73,10 +78,17 @@ export function useTransactionHistory(
           ? "incoming"
           : "outgoing";
 
+      // Calculate USD value if exchange rate is available
+      const valueUSD =
+        tx.exchangeRate !== null
+          ? valueETHNum * Number.parseFloat(tx.exchangeRate)
+          : null;
+
       return {
         ...tx,
         valueETH,
         valueETHNum,
+        valueUSD,
         direction,
       };
     }) ?? [];

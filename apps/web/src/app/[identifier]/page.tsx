@@ -4,9 +4,9 @@ import { Gift } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { DonationPopover } from "@/components/donation-modal";
 import { StreamEmbed } from "@/components/stream-embed";
 import { Button } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useArtistProfile } from "@/hooks/use-artist-profile";
 import { SocialKey } from "@/lib/constants";
@@ -38,7 +38,7 @@ export default function ArtistProfilePage() {
     return (
       <div className="mx-auto w-full max-w-7xl py-12">
         <div className="mb-8 space-y-4">
-          <Skeleton className="h-64 w-full rounded-lg border border-border bg-card shadow-md" />
+          <Skeleton className="h-64 w-full rounded-lg border border-border bg-background/80 shadow-md" />
           <div className="flex items-center gap-6">
             <Skeleton className="h-32 w-32 rounded-full border border-border/30 border-dashed" />
             <div className="flex-1 space-y-3">
@@ -54,7 +54,7 @@ export default function ArtistProfilePage() {
   if (!artist) {
     return (
       <div className="mx-auto w-full max-w-4xl py-16 text-center">
-        <div className="space-y-4 rounded-lg border border-border bg-card p-10 shadow-md">
+        <div className="space-y-4 rounded-lg border border-border bg-background/80 p-10 shadow-md">
           <div className="text-5xl">🤔</div>
           <h2 className="font-black text-2xl text-foreground leading-tight">
             Artist not found
@@ -76,15 +76,18 @@ export default function ArtistProfilePage() {
   const description = getTextRecord(artist.textRecords?.(), "description");
 
   return (
-    <div className="mx-auto w-full max-w-7xl py-12">
-      <div className="mb-6 flex items-center justify-between">
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/">← Back to Home</Link>
-        </Button>
-      </div>
+    <Container>
+      <Button
+        asChild
+        className="mb-4 px-0 text-sm hover:bg-transparent hover:opacity-60"
+        size="sm"
+        variant="ghost"
+      >
+        <Link href="/">← Back to Home</Link>
+      </Button>
 
       {artist.isStreaming && artist.streamUrl && artist.streamPlatform && (
-        <div className="mb-8 overflow-hidden rounded-lg border border-border bg-card p-0 shadow-md">
+        <div className="mb-8 overflow-hidden rounded-lg border border-border bg-primary/20 p-0 shadow-md">
           <StreamEmbed
             artistName={artist.subdomain || identifier}
             streamPlatform={artist.streamPlatform}
@@ -95,7 +98,7 @@ export default function ArtistProfilePage() {
         </div>
       )}
 
-      <div className="mb-8 flex flex-col gap-6 rounded-lg border border-border bg-card px-8 py-10 shadow-md md:flex-row md:items-start">
+      <div className="mb-8 flex flex-col gap-6 rounded-lg border border-border bg-primary/20 px-8 py-10 shadow-md md:flex-row md:items-start">
         <div className="flex-shrink-0">
           {avatar ? (
             <Image
@@ -111,7 +114,7 @@ export default function ArtistProfilePage() {
             <div
               className={`flex h-32 w-32 items-center justify-center rounded-full border-2 ${
                 artist.isStreaming ? "border-live" : "border-border"
-              } bg-card text-4xl`}
+              } bg-background/80 text-4xl`}
             >
               👤
             </div>
@@ -130,49 +133,48 @@ export default function ArtistProfilePage() {
             )}
           </div>
 
-          <DonationPopover
-            ensName={artist.subdomain ?? ""}
-            walletAddress={artist.user?.address}
-          >
+          <Link href={`/${artist.subdomain || identifier}/gift`}>
             <Button size="lg">
               <Gift className="h-3 w-3" />
             </Button>
-          </DonationPopover>
+          </Link>
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card px-8 py-10 shadow-md">
-        <h3 className="mb-6 font-black text-2xl text-foreground leading-tight">
+      <div className="rounded-lg border border-border bg-primary/20 px-4 py-6 shadow-md sm:px-8 sm:py-10">
+        <h3 className="mb-4 font-black text-foreground text-xl leading-tight sm:mb-6 sm:text-2xl">
           🔗 Connect & Listen
         </h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {artist
             .textRecords?.()
             ?.filter((x) => SocialKey.safeParse(x.key).success)
             .map((record) => (
               <a
-                className="hover:-translate-y-0.5 flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md"
+                className="hover:-translate-y-0.5 flex w-full flex-nowrap items-center gap-2 rounded-lg border border-border bg-primary/20 px-3 py-2.5 shadow-sm transition-all duration-200 hover:shadow-md sm:gap-3 sm:px-4 sm:py-3"
                 href={record.value}
-                key={record.value}
+                key={`${record.key}-${record.value}`}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                <span className="text-2xl">
+                <span className="flex flex-shrink-0 items-center justify-center text-lg leading-none sm:text-2xl">
                   {SOCIAL_ICONS[SocialKey.parse(record.key)] || "🔗"}
                 </span>
-                <div className="flex-1 overflow-hidden">
-                  <div className="font-semibold text-foreground capitalize">
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
+                  <div className="min-w-0 truncate font-semibold text-foreground text-sm capitalize leading-tight sm:text-base">
                     {record.key}
                   </div>
-                  <div className="truncate text-muted-foreground text-xs">
+                  <div className="min-w-0 truncate text-[10px] text-muted-foreground leading-tight sm:text-xs">
                     {record.value}
                   </div>
                 </div>
-                <span className="text-muted-foreground">→</span>
+                <span className="flex-shrink-0 text-muted-foreground text-sm sm:text-base">
+                  →
+                </span>
               </a>
             ))}
         </div>
       </div>
-    </div>
+    </Container>
   );
 }

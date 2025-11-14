@@ -40,7 +40,6 @@ export function useOwnedProfile() {
       textRecords: textRecordsData,
       ensName,
     },
-    isLoading: $state.isLoading,
     hasProfile: !!userData,
     error: $state.error,
   };

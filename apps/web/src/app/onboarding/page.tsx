@@ -11,6 +11,7 @@ import { NoInvite } from "@/app/onboarding/_components/no-invite";
 import { ProfileSetupStep } from "@/app/onboarding/_components/profile-setup-step";
 import { Card } from "@/components/ui/card";
 import { useCreateProfile } from "@/hooks/use-create-profile";
+import { useHasProfileSetup } from "@/hooks/use-has-profile-setup";
 import { useHasSubdomainContract } from "@/hooks/use-has-subdomain-contract";
 import { useRegisterSubdomain } from "@/hooks/use-register-subdomain";
 import type { AllValidKeys } from "@/lib/constants";
@@ -37,8 +38,13 @@ export default function OnboardingPage() {
   const { address, connector } = useAccount();
   const isPorto = connector?.name === "Porto";
 
-  const { hasSubdomain: hasProfile, isLoading: isCheckingOwnership } =
+  const { hasSubdomain, isLoading: isCheckingOwnership } =
     useHasSubdomainContract(address);
+  const { hasProfileSetup, isLoading: isCheckingProfile } =
+    useHasProfileSetup(address);
+
+  // Only show "already has profile" if BOTH subdomain exists AND profile setup is complete
+  const hasCompleteProfile = hasSubdomain && hasProfileSetup;
 
   const [step, setStep] = useState<1 | 2>(1);
   const createProfile = useCreateProfile();
@@ -94,12 +100,12 @@ export default function OnboardingPage() {
   };
 
   // Loading state
-  if (isCheckingOwnership) {
+  if (isCheckingOwnership || isCheckingProfile) {
     return <LoadingState />;
   }
 
-  // Already has profile
-  if (hasProfile) {
+  // Already has complete profile (subdomain + text records)
+  if (hasCompleteProfile) {
     return (
       <AlreadyHasProfile
         address={address}

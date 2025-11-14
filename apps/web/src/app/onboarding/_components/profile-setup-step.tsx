@@ -56,8 +56,8 @@ export function ProfileSetupStep({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-success/40 bg-card/80 px-4 py-5 shadow-sm">
-        <p className="mb-1 font-semibold text-sm text-success-foreground">
+      <div className="rounded-lg border border-success/40 bg-background/80 px-4 py-5 shadow-sm">
+        <p className="mb-1 font-semibold text-sm text-success">
           Your Domain: {ensName}.{ENS.PARENT_DOMAIN} ✓
         </p>
       </div>
@@ -144,7 +144,7 @@ export function ProfileSetupStep({
 
             return (
               <div
-                className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 shadow-sm"
+                className="flex items-center gap-2 rounded-lg border border-border bg-background/80 px-4 py-3 shadow-sm"
                 key={social.platform}
               >
                 <span className="text-2xl">{social.icon}</span>

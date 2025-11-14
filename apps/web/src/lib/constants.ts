@@ -2,6 +2,8 @@
  * Application constants and configuration values
  */
 import { z } from "zod";
+import { getCurrentEnsEnvironment } from "./ens-environments";
+
 // Subdomain validation rules
 export const SUBDOMAIN_VALIDATION = {
   MIN_LENGTH: 3,
@@ -28,9 +30,11 @@ export const TIME = {
   MS_PER_2_WEEKS: 1_209_600_000,
 } as const;
 
-// ENS configuration
+// ENS configuration (dynamic based on environment)
 export const ENS = {
-  PARENT_DOMAIN: "catmisha.eth",
+  get PARENT_DOMAIN() {
+    return getCurrentEnsEnvironment().domain;
+  },
 } as const;
 
 // ENS text record keys
@@ -165,9 +169,12 @@ export const DEBOUNCE_TIME = 300;
 
 // External API URLs
 export const API_URLS = {
-  BASESCAN: "https://api.basescan.org/api",
+  GRAPH_TOKEN_API: "https://token-api.thegraph.com/v1/evm/transfers",
+  GRAPH_POOL_OHLC: "https://token-api.thegraph.com/v1/evm/pools/ohlc",
 } as const;
 
-// App configuration
-export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+// DEX Pool Addresses for Price Data
+export const GRAPH_POOLS = {
+  // Ethereum mainnet USDC/WETH pool (ETH price is universal across chains)
+  ETH_USDC_MAINNET: "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640",
+} as const;

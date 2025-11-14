@@ -26,7 +26,7 @@ export function useWalletBalance(
   address: `0x${string}` | undefined,
   ethPriceUSD = 2000
 ): UseWalletBalanceResult {
-  const { data, isLoading, isError, error, refetch } = useBalance({
+  const { data, isPending, isError, error, refetch } = useBalance({
     address,
   });
 
@@ -53,7 +53,7 @@ export function useWalletBalance(
     balanceUSD,
     balanceUSDNum,
     formatted,
-    isLoading,
+    isLoading: isPending,
     isError,
     error: error as Error | null,
     refetch,

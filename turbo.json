@@ -6,7 +6,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["PINATA_JWT", "MERCHANT_ADDRESS", "MERCHANT_PRIVATE_KEY"]
+      "env": ["PINATA_JWT", "MERCHANT_ADDRESS", "MERCHANT_PRIVATE_KEY", "GRAPH_JWT"]
     },
     "dev": {
       "cache": false,

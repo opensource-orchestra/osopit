@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../index.css";
 import { headers } from "next/headers";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ArtistBottomBar } from "@/components/artist-bottom-bar";
 import Providers from "@/components/providers";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,10 +38,8 @@ export default async function RootLayout({
           <Providers cookies={cookies}>
             <div className="flex min-h-screen flex-col bg-background text-foreground">
               <main className="flex-1">{children}</main>
-              {/* Fixed theme switcher - accessible from all pages */}
-              <div className="fixed right-4 bottom-4 z-50">
-                <ThemeSwitcher />
-              </div>
+              {/* Footer - context-aware artist nav + theme switcher */}
+              <ArtistBottomBar />
             </div>
           </Providers>
         </NuqsAdapter>

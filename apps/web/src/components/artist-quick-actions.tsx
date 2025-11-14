@@ -124,7 +124,7 @@ export function ArtistQuickActions({
     return (
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="border-border bg-card">
+        <DrawerContent className="border-border bg-background/80">
           <DrawerHeader>
             <DrawerTitle className="text-foreground">
               Artist Profile
@@ -142,7 +142,7 @@ export function ArtistQuickActions({
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="border-border bg-card p-4">
+      <PopoverContent className="border-border bg-background/80 p-4">
         <ArtistPreviewContent ensName={ensName} />
       </PopoverContent>
     </Popover>

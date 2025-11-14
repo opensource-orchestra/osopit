@@ -38,7 +38,7 @@ function parseBroadcast(value: string | undefined): {
 
 /**
  * Hook to fetch a single artist profile by identifier
- * Supports both ENS names (e.g., "kris" or "kris.catmisha.eth") and Ethereum addresses (e.g., "0x123...")
+ * Supports both ENS names (e.g., "kris" or "kris.osopit.eth") and Ethereum addresses (e.g., "0x123...")
  * Returns GQty subdomain data with streaming info
  */
 export function useArtistProfile(identifier?: string) {

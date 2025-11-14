@@ -24,7 +24,7 @@ export function isEthereumAddress(input: string): boolean {
 
 /**
  * Parse ENS name to extract the subdomain label
- * Handles both "kris" and "kris.catmisha.eth" formats
+ * Handles both "kris" and "kris.osopit.eth" formats
  * @param ensName - Full or partial ENS name
  * @returns The subdomain label (first part before first dot)
  */

@@ -58,7 +58,7 @@ export function StartBroadcastForm() {
   const isValid = !urlError && streamUrl && platform;
 
   return (
-    <Card className="border-border bg-card p-6 backdrop-blur">
+    <Card className="border-border bg-background/80 p-6 backdrop-blur">
       <h2 className="mb-6 font-bold text-foreground text-xl">
         🎥 Start Streaming
       </h2>

@@ -60,7 +60,7 @@ export function ShareLinkSheet({
     <Drawer onOpenChange={onOpenChange} open={open}>
       <DrawerContent>
         <DrawerHeader className="text-center">
-          <DrawerTitle>Share Your Tip Link</DrawerTitle>
+          <DrawerTitle>Share Your Gift Link</DrawerTitle>
           <DrawerDescription>
             Show this QR code or share the link to receive tips
           </DrawerDescription>

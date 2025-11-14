@@ -180,7 +180,7 @@ export default function InvitePage() {
   if (isPorto) {
     return (
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-4">
-        <Card className="w-full border-border bg-card p-8 text-center backdrop-blur">
+        <Card className="w-full border-border bg-background/80 p-8 text-center backdrop-blur">
           <h1 className="mb-4 font-bold text-2xl text-foreground">
             Switch Wallet Required
           </h1>
@@ -219,7 +219,7 @@ export default function InvitePage() {
   if (!isConnected) {
     return (
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-4">
-        <Card className="w-full border-border bg-card p-8 text-center backdrop-blur">
+        <Card className="w-full border-border bg-background/80 p-8 text-center backdrop-blur">
           <h1 className="mb-4 font-bold text-2xl text-foreground">
             Generate Invites
           </h1>
@@ -243,7 +243,7 @@ export default function InvitePage() {
   if (!isInviter) {
     return (
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-4">
-        <Card className="w-full border-border bg-card p-8 text-center backdrop-blur">
+        <Card className="w-full border-border bg-background/80 p-8 text-center backdrop-blur">
           <h1 className="mb-4 font-bold text-2xl text-foreground">
             Unauthorized
           </h1>
@@ -270,7 +270,7 @@ export default function InvitePage() {
         </p>
       </div>
 
-      <Card className="border-border bg-card p-8 backdrop-blur">
+      <Card className="border-border bg-background/80 p-8 backdrop-blur">
         {generatedInvite ? (
           <div className="space-y-6">
             <div className="rounded-lg border border-success/20 bg-success/10 p-4">
@@ -284,7 +284,7 @@ export default function InvitePage() {
 
             <div>
               <Label>Invite URL</Label>
-              <div className="mt-2 break-all rounded-md border border-border bg-surface-elevated p-3 font-mono text-foreground text-xs">
+              <div className="mt-2 break-all rounded-md border border-border bg-background p-3 font-mono text-foreground text-xs">
                 {generatedInvite}
               </div>
             </div>
@@ -302,7 +302,7 @@ export default function InvitePage() {
               </Button>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-4">
+            <div className="rounded-lg border border-border bg-background/80 p-4">
               <p className="mb-2 font-medium text-foreground text-md">
                 Invite Details
               </p>
@@ -341,7 +341,7 @@ export default function InvitePage() {
             <div>
               <Label htmlFor="expiration">Expiration</Label>
               <select
-                className="mt-2 w-full rounded-md border border-border bg-surface-elevated px-3 py-2 text-foreground text-md focus:border-brand focus:outline-none"
+                className="mt-2 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground text-md focus:border-brand focus:outline-none"
                 id="expiration"
                 onChange={(e) => setExpirationDays(e.target.value)}
                 value={expirationDays}

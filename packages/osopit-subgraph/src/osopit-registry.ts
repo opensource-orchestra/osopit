@@ -20,7 +20,7 @@ export function handleNameRegistered(event: NameRegisteredEvent): void {
   }
 
   // Calculate node hash for the subdomain
-  const fullName = `${label}.catmisha.eth`;
+  const fullName = `${label}.osopit.eth`;
   const nodeBytes = namehash(fullName);
   const nodeHash = nodeBytes.toHexString();
 

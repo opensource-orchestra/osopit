@@ -1,3 +1,4 @@
+import { resolve } from "@/gqty";
 import {
   calculateNodeHash,
   isEthereumAddress,
@@ -19,116 +20,131 @@ type ArtistProfile = {
   textRecords: TextRecord[];
 };
 
-/**
- * Server-side function to fetch artist profile from subgraph
- * Supports both ENS names and Ethereum addresses
- */
+function normalizeTextRecords(
+  records:
+    | Array<{ key?: string | null; value?: string | null }>
+    | null
+    | undefined
+): TextRecord[] {
+  if (!records) {
+    return [];
+  }
+
+  return records.map((record) => ({
+    key: record?.key ?? "",
+    value: record?.value ?? "",
+  }));
+}
+
+function buildArtistProfileFromUser(
+  user: {
+    address?: string | null;
+    subdomain?: {
+      name?: string | null;
+      node?: string | null;
+      textRecords?: (args: { first: number }) => Array<{
+        key?: string | null;
+        value?: string | null;
+      }> | null;
+    } | null;
+  } | null
+): ArtistProfile | null {
+  if (!user) {
+    return null;
+  }
+
+  const subdomain = user.subdomain;
+  const name = subdomain?.name ?? undefined;
+  const node = subdomain?.node ?? undefined;
+  const textRecords = subdomain?.textRecords?.({ first: 100 });
+
+  return {
+    address: user.address ?? "",
+    subdomain: name && node ? { name, node } : null,
+    textRecords: normalizeTextRecords(textRecords),
+  };
+}
+
+function buildArtistProfileFromSubdomain(
+  subdomain: {
+    name?: string | null;
+    node?: string | null;
+    owner?: { address?: string | null } | null;
+    textRecords: (args: { first: number }) => Array<{
+      key?: string | null;
+      value?: string | null;
+    }> | null;
+  } | null
+): ArtistProfile | null {
+  if (!subdomain) {
+    return null;
+  }
+
+  const name = subdomain.name ?? undefined;
+  const node = subdomain.node ?? undefined;
+  const ownerAddress = subdomain.owner?.address ?? "";
+  const textRecords = subdomain.textRecords({ first: 100 });
+
+  return {
+    address: ownerAddress,
+    subdomain: name && node ? { name, node } : null,
+    textRecords: normalizeTextRecords(textRecords),
+  };
+}
+
+function fetchProfileByAddress(
+  query: {
+    user: (args: { id: string }) => {
+      address?: string | null;
+      subdomain?: {
+        name?: string | null;
+        node?: string | null;
+        textRecords?: (args: { first: number }) => Array<{
+          key?: string | null;
+          value?: string | null;
+        }> | null;
+      } | null;
+    } | null;
+  },
+  normalized: string
+): ArtistProfile | null {
+  const user = query.user({ id: normalized });
+  return buildArtistProfileFromUser(user);
+}
+
+function fetchProfileBySubdomain(
+  query: {
+    subdomain: (args: { id: string }) => {
+      name?: string | null;
+      node?: string | null;
+      owner?: { address?: string | null } | null;
+      textRecords: (args: { first: number }) => Array<{
+        key?: string | null;
+        value?: string | null;
+      }> | null;
+    } | null;
+  },
+  normalized: string
+): ArtistProfile | null {
+  const nodeHash = calculateNodeHash(parseEnsLabel(normalized));
+  const subdomain = query.subdomain({ id: nodeHash });
+  return buildArtistProfileFromSubdomain(subdomain);
+}
+
 export async function getArtistProfileServer(
   identifier: string
 ): Promise<ArtistProfile | null> {
   const normalized = normalizeIdentifier(identifier);
   const isAddress = isEthereumAddress(normalized);
 
-  // Construct GraphQL query based on identifier type
-  const query = isAddress
-    ? `
-      query GetUserProfile($id: ID!) {
-        user(id: $id) {
-          address
-          subdomain {
-            name
-            node
-            textRecords {
-              key
-              value
-            }
-          }
-        }
-      }
-    `
-    : `
-      query GetSubdomainProfile($node: Bytes!) {
-        subdomain(id: $node) {
-          name
-          node
-          owner {
-            address
-          }
-          textRecords {
-            key
-            value
-          }
-        }
-      }
-    `;
-
-  const variables = isAddress
-    ? { id: normalized }
-    : { node: calculateNodeHash(parseEnsLabel(normalized)) };
-
   try {
-    // Get subgraph URL from environment or use default
-    const subgraphUrl =
-      process.env.NEXT_PUBLIC_SUBGRAPH_URL ||
-      "https://api.studio.thegraph.com/query/90913/osopit-subgraphv-1/version/latest";
+    const result = await resolve(({ query }) =>
+      isAddress
+        ? fetchProfileByAddress(query, normalized)
+        : fetchProfileBySubdomain(query, normalized)
+    );
 
-    const response = await fetch(subgraphUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-      next: {
-        revalidate: 60, // Cache for 1 minute
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Subgraph request failed: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-
-    if (result.errors) {
-      console.error("GraphQL errors:", result.errors);
-      return null;
-    }
-
-    // Parse response based on query type
-    if (isAddress) {
-      const user = result.data?.user;
-      if (!user) {
-        return null;
-      }
-
-      return {
-        address: user.address,
-        subdomain: user.subdomain
-          ? {
-              name: user.subdomain.name,
-              node: user.subdomain.node,
-            }
-          : null,
-        textRecords: user.subdomain?.textRecords || [],
-      };
-    }
-
-    const subdomain = result.data?.subdomain;
-    if (!subdomain) {
-      return null;
-    }
-
-    return {
-      address: subdomain.owner.address,
-      subdomain: {
-        name: subdomain.name,
-        node: subdomain.node,
-      },
-      textRecords: subdomain.textRecords || [],
-    };
+    return result;
   } catch (error) {
     console.error("Error fetching artist profile:", error);
     return null;

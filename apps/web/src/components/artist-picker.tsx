@@ -114,7 +114,7 @@ export function ArtistPicker({
 
           {/* Dropdown */}
           {showDropdown && filteredArtists.length > 0 && (
-            <Card className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto border-border bg-card p-2">
+            <Card className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto border-border bg-background/80 p-2">
               {filteredArtists.slice(0, 10).map((artist) => {
                 const address = artist.subdomain?.owner?.address || "";
                 const name = artist.subdomain?.name || "";
@@ -125,7 +125,7 @@ export function ArtistPicker({
 
                 return (
                   <button
-                    className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-surface-elevated"
+                    className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-background"
                     key={address}
                     onClick={() => handleSelect(address)}
                     type="button"

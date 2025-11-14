@@ -95,7 +95,7 @@ export function LiveBroadcastCard({ profile }: LiveBroadcastCardProps) {
 
   return (
     <TooltipProvider>
-      <Card className="relative overflow-hidden border-live/30 bg-card p-6 backdrop-blur before:absolute before:inset-0 before:bg-live/10">
+      <Card className="relative overflow-hidden border-live/30 bg-background/80 p-6 backdrop-blur before:absolute before:inset-0 before:bg-live/10">
         <div className="relative z-10 space-y-4">
           {/* Live Badge + Duration */}
           <div className="flex items-center justify-between">

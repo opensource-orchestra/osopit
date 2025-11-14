@@ -11,7 +11,7 @@ import { namehash } from "viem/ens";
 
 // Contract addresses
 
-const RESOLVER_ADDRESS = "0xa609955257eacbbd566a1fa654e6c5f4b1fdc9e2"; // ITextResolver (for setText)
+const RESOLVER_ADDRESS = "0x8c77dd23735dbe20c3cae29250bdd3bf80e6f9b1"; // ITextResolver (for setText)
 
 // ABI for setText function (which emits TextChanged)
 const resolverAbi = parseAbi([
@@ -61,7 +61,7 @@ async function emitTextChanged() {
   console.log(`Contract: ${RESOLVER_ADDRESS}`);
 
   // Get parameters
-  const ensName = process.env.ENS_NAME || "corot.catmisha.eth";
+  const ensName = process.env.ENS_NAME || "corot.osopit.eth";
   const key = process.env.KEY || "avatar1";
   const value = process.env.VALUE || "avatar1";
 

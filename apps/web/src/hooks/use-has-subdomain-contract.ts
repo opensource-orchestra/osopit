@@ -15,6 +15,7 @@ export function useHasSubdomainContract(address: string | undefined) {
     args: address ? [address as `0x${string}`] : undefined,
     query: {
       enabled: !!address,
+      refetchOnWindowFocus: false,
     },
   });
 

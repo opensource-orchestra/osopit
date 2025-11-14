@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Container } from "@/components/ui/container";
 import { ADDRESS_PREFIX_LENGTH, ADDRESS_SUFFIX_LENGTH } from "@/lib/constants";
 
 type AlreadyHasProfileProps = {
@@ -14,14 +15,14 @@ export function AlreadyHasProfile({
   onGoHome,
 }: AlreadyHasProfileProps) {
   return (
-    <div className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center justify-center">
-      <Card className="w-full space-y-6 rounded-lg border border-border/60 bg-card/90 p-10 text-center shadow-sm backdrop-blur">
+    <Container sm>
+      <Card className="w-full space-y-6 rounded-lg border border-border/60 bg-background/80 p-10 text-center shadow-sm backdrop-blur">
         <h1 className="font-black text-2xl text-foreground leading-tight">
           Profile Already Exists
         </h1>
         <div className="space-y-4">
-          <div className="rounded-lg border border-info/40 bg-card/80 px-4 py-5 text-left shadow-sm">
-            <p className="mb-2 font-semibold text-info-foreground text-sm">
+          <div className="rounded-lg border border-primary px-4 py-5 text-left shadow-sm">
+            <p className="mb-2 font-semibold text-foreground text-sm">
               You already own a subdomain
             </p>
             {ensName ? (
@@ -45,6 +46,6 @@ export function AlreadyHasProfile({
           Go to Home
         </Button>
       </Card>
-    </div>
+    </Container>
   );
 }

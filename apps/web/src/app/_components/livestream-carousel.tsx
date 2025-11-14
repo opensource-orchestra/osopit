@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { StreamEmbed } from "@/components/stream-embed";
 import {
   Carousel,
-  type CarouselApi,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
@@ -15,27 +13,6 @@ type LivestreamCarouselProps = {
 };
 
 export function LivestreamCarousel({ broadcasts }: LivestreamCarouselProps) {
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCurrent(api.selectedScrollSnap());
-
-    const handleSelect = () => {
-      setCurrent(api.selectedScrollSnap());
-    };
-
-    api.on("select", handleSelect);
-
-    return () => {
-      api.off("select", handleSelect);
-    };
-  }, [api]);
-
   if (!broadcasts || broadcasts.length === 0) {
     return null;
   }
@@ -49,12 +26,11 @@ export function LivestreamCarousel({ broadcasts }: LivestreamCarouselProps) {
           align: "start",
           slidesToScroll: 1,
         }}
-        setApi={setApi}
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="md:-ml-4 ml-0">
           {broadcasts.map((broadcast, index) => (
             <CarouselItem
-              className="basis-full pl-4 sm:basis-1/2 md:basis-1/3"
+              className="basis-full pl-0 md:basis-1/3 md:pl-4"
               key={broadcast.subdomain?.name ?? `broadcast-${index}`}
             >
               <div className="h-[400px]">
@@ -71,7 +47,7 @@ export function LivestreamCarousel({ broadcasts }: LivestreamCarouselProps) {
                     }
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center rounded-lg bg-surface-elevated">
+                  <div className="flex h-full items-center justify-center rounded-lg bg-background">
                     <p className="text-muted-foreground">Stream unavailable</p>
                   </div>
                 )}
@@ -80,24 +56,6 @@ export function LivestreamCarousel({ broadcasts }: LivestreamCarouselProps) {
           ))}
         </CarouselContent>
       </Carousel>
-
-      {broadcasts.length > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          {broadcasts.map((broadcast, index) => (
-            <button
-              aria-label={`Go to stream ${index + 1} of ${broadcasts.length}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                index === current
-                  ? "w-12 bg-live shadow-lg shadow-live/50"
-                  : "w-2 bg-muted-foreground/30 hover:scale-125 hover:bg-muted-foreground/60"
-              }`}
-              key={`dot-${broadcast.subdomain?.name ?? index}`}
-              onClick={() => api?.scrollTo(index)}
-              type="button"
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -89,9 +89,9 @@ function DonationContent({
       </div>
 
       {walletAddress && (
-        <div className="mb-6 overflow-hidden rounded-lg border border-border bg-card/50">
+        <div className="mb-6 overflow-hidden rounded-lg border border-border bg-background/80">
           <Button
-            className="w-full justify-between rounded-none border-0 border-border border-b bg-transparent hover:bg-card/70"
+            className="w-full justify-between rounded-none border-0 border-border border-b bg-transparent hover:bg-background/80"
             onClick={() => setShowWalletAddress(!showWalletAddress)}
             variant="outline"
           >
@@ -171,7 +171,7 @@ function DonationContent({
           />
         </div>
 
-        <div className="mt-4 rounded-lg border border-border bg-card p-4">
+        <div className="mt-4 rounded-lg border border-border bg-background/80 p-4">
           <div className="flex justify-between text-md">
             <span className="text-muted-foreground">Amount:</span>
             <span className="font-mono font-semibold text-foreground">
@@ -233,7 +233,7 @@ export function DonationPopover({
     return (
       <Drawer onOpenChange={setIsOpen} open={isOpen}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="border-border bg-card">
+        <DrawerContent className="border-border bg-background/80">
           <DrawerHeader>
             <DrawerTitle className="text-foreground">Send a Gift</DrawerTitle>
           </DrawerHeader>
@@ -253,7 +253,7 @@ export function DonationPopover({
   return (
     <Popover onOpenChange={setIsOpen} open={isOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="border-border bg-card p-4">
+      <PopoverContent className="border-border bg-background/80 p-4">
         <DonationContent
           artistEnsName={ensName}
           onSuccess={handleSuccess}

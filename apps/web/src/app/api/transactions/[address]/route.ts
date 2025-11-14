@@ -1,22 +1,57 @@
 import { NextResponse } from "next/server";
 import { isAddress } from "viem";
+import { z } from "zod";
+import { env } from "@/env";
 import { API_URLS } from "@/lib/constants";
 
-type Transaction = {
+// Zod schema for Graph Token API transaction
+const GraphTransferSchema = z.object({
+  block_num: z.number(),
+  datetime: z.string(),
+  timestamp: z.number(),
+  transaction_id: z.string(),
+  log_index: z.number(),
+  contract: z.string(), // "0xeeee...eeee" for native ETH
+  from: z.string(),
+  to: z.string(),
+  name: z.string(),
+  symbol: z.string(),
+  decimals: z.number(),
+  amount: z.string(), // Wei as string
+  value: z.number(), // Already formatted as decimal
+  network: z.string(),
+});
+
+// Zod schema for Graph API response
+const GraphApiResponseSchema = z.object({
+  data: z.array(GraphTransferSchema),
+  statistics: z.object({
+    bytes_read: z.number(),
+    rows_read: z.number(),
+    elapsed: z.number(),
+  }),
+  pagination: z.object({
+    previous_page: z.number(),
+    current_page: z.number(),
+  }),
+  results: z.number(),
+  request_time: z.string(),
+  duration_ms: z.number(),
+});
+
+// Our unified transaction type
+type UnifiedTransaction = {
   hash: string;
   from: string;
   to: string;
-  value: string; // in Wei
-  timeStamp: string; // Unix timestamp
-  blockNumber: string;
-  isError: string; // "0" or "1"
+  value: string; // Wei as string (for consistency)
+  timestamp: number;
+  blockNumber: number;
+  exchangeRate: null; // Graph API doesn't provide this
+  type: "normal";
 };
 
-type BasescanResponse = {
-  status: string;
-  message: string;
-  result: Transaction[];
-};
+const NATIVE_ETH_CONTRACT = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
 export async function GET(
   _request: Request,
@@ -33,60 +68,110 @@ export async function GET(
       );
     }
 
-    // Get Basescan API key from environment
-    const apiKey = process.env.BASESCAN_API_KEY;
-    if (!apiKey) {
-      console.error("BASESCAN_API_KEY not configured");
-      return NextResponse.json(
-        { error: "API key not configured" },
-        { status: 500 }
-      );
-    }
+    const graphJwt = env.GRAPH_JWT;
 
-    // Fetch normal transactions from Basescan
-    const url = new URL(API_URLS.BASESCAN);
-    url.searchParams.set("module", "account");
-    url.searchParams.set("action", "txlist");
-    url.searchParams.set("address", address);
-    url.searchParams.set("startblock", "0");
-    url.searchParams.set("endblock", "99999999");
-    url.searchParams.set("page", "1");
-    url.searchParams.set("offset", "20"); // Last 20 transactions
-    url.searchParams.set("sort", "desc"); // Most recent first
-    url.searchParams.set("apikey", apiKey);
-
-    const response = await fetch(url.toString(), {
-      next: { revalidate: 60 }, // Cache for 1 minute
+    // Build URLs for received and sent transactions
+    const baseParams = new URLSearchParams({
+      network: "base",
+      limit: "10", // Free tier max
+      page: "1",
     });
 
-    if (!response.ok) {
-      throw new Error(`Basescan API error: ${response.statusText}`);
+    const receivedUrl = new URL(API_URLS.GRAPH_TOKEN_API);
+    receivedUrl.search = new URLSearchParams({
+      ...Object.fromEntries(baseParams),
+      to_address: address,
+    }).toString();
+
+    const sentUrl = new URL(API_URLS.GRAPH_TOKEN_API);
+    sentUrl.search = new URLSearchParams({
+      ...Object.fromEntries(baseParams),
+      from_address: address,
+    }).toString();
+
+    // Fetch both received and sent transactions in parallel
+    const [receivedResponse, sentResponse] = await Promise.all([
+      fetch(receivedUrl.toString(), {
+        headers: {
+          Authorization: `Bearer ${graphJwt}`,
+        },
+        next: { revalidate: 60 },
+      }),
+      fetch(sentUrl.toString(), {
+        headers: {
+          Authorization: `Bearer ${graphJwt}`,
+        },
+        next: { revalidate: 60 },
+      }),
+    ]);
+
+    if (!(receivedResponse.ok && sentResponse.ok)) {
+      throw new Error("Graph API error");
     }
 
-    const data = (await response.json()) as BasescanResponse;
+    // Parse responses
+    const [receivedData, sentData] = await Promise.all([
+      receivedResponse.json(),
+      sentResponse.json(),
+    ]);
 
-    // Check for API errors
-    if (data.status !== "1") {
-      // Status "0" usually means no transactions found, not an error
-      if (data.message === "No transactions found") {
-        return NextResponse.json({ transactions: [] });
+    // Validate responses
+    const receivedParsed = GraphApiResponseSchema.safeParse(receivedData);
+    const sentParsed = GraphApiResponseSchema.safeParse(sentData);
+
+    if (!(receivedParsed.success && sentParsed.success)) {
+      console.error("Graph API response validation failed");
+      throw new Error("Invalid response from Graph API");
+    }
+
+    const transactions: UnifiedTransaction[] = [];
+
+    // Process received transactions - only native ETH
+    for (const transfer of receivedParsed.data.data) {
+      // Only include native ETH transfers (skip ERC-20/721 tokens)
+      if (transfer.contract.toLowerCase() !== NATIVE_ETH_CONTRACT) {
+        continue;
       }
-      throw new Error(`Basescan API error: ${data.message}`);
+
+      transactions.push({
+        hash: transfer.transaction_id,
+        from: transfer.from.toLowerCase(),
+        to: transfer.to.toLowerCase(),
+        value: transfer.amount, // Use wei string for consistency
+        timestamp: transfer.timestamp,
+        blockNumber: transfer.block_num,
+        exchangeRate: null, // Graph doesn't provide historical price
+        type: "normal",
+      });
     }
 
-    // Filter successful transactions and format response
-    const transactions = data.result
-      .filter((tx) => tx.isError === "0") // Only successful transactions
-      .map((tx) => ({
-        hash: tx.hash,
-        from: tx.from.toLowerCase(),
-        to: tx.to.toLowerCase(),
-        value: tx.value, // Wei as string
-        timestamp: Number.parseInt(tx.timeStamp, 10),
-        blockNumber: Number.parseInt(tx.blockNumber, 10),
-      }));
+    // Process sent transactions - only native ETH
+    for (const transfer of sentParsed.data.data) {
+      // Only include native ETH transfers (skip ERC-20/721 tokens)
+      if (transfer.contract.toLowerCase() !== NATIVE_ETH_CONTRACT) {
+        continue;
+      }
 
-    return NextResponse.json({ transactions });
+      transactions.push({
+        hash: transfer.transaction_id,
+        from: transfer.from.toLowerCase(),
+        to: transfer.to.toLowerCase(),
+        value: transfer.amount, // Use wei string for consistency
+        timestamp: transfer.timestamp,
+        blockNumber: transfer.block_num,
+        exchangeRate: null, // Graph doesn't provide historical price
+        type: "normal",
+      });
+    }
+
+    // Remove duplicates and sort by timestamp (most recent first)
+    const uniqueTransactions = Array.from(
+      new Map(transactions.map((tx) => [tx.hash, tx])).values()
+    )
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 20);
+
+    return NextResponse.json({ transactions: uniqueTransactions });
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(

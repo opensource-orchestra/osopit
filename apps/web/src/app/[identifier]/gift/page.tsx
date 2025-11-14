@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TipForm } from "@/app/[identifier]/gift/_components/tip-form";
+import { Button } from "@/components/ui/button";
 import { getArtistProfileServer } from "@/lib/get-artist-profile-server";
 import { getTextRecord } from "@/lib/utils";
 
@@ -17,21 +19,27 @@ type GiftPageProps = {
 export default async function GiftPage({ params }: GiftPageProps) {
   const { identifier } = await params;
 
-  // Fetch artist profile server-side
   const profile = await getArtistProfileServer(identifier);
 
-  // 404 if artist not found
   if (!profile?.subdomain) {
     notFound();
   }
 
   const artistName = profile.subdomain.name;
-  const ensName = `${artistName}.catmisha.eth`;
+  const ensName = `${artistName}.osopit.eth`;
   const avatar = getTextRecord(profile.textRecords, "avatar");
   const bio = getTextRecord(profile.textRecords, "description");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-primary/20 p-4">
+      <Button
+        asChild
+        className="w-full max-w-md justify-start px-0 text-sm hover:bg-transparent hover:opacity-60"
+        size="sm"
+        variant="ghost"
+      >
+        <Link href="/">← Back to Home</Link>
+      </Button>
       <TipForm
         artistAddress={profile.address}
         artistAvatar={avatar}

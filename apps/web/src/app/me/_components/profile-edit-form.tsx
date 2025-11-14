@@ -188,7 +188,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     avatarPreview || (avatarValue ? ipfsToHttp(avatarValue) : null);
 
   return (
-    <Card className="border-border bg-card p-6 backdrop-blur">
+    <Card className="border-border bg-background/80 p-6 backdrop-blur">
       <div className="mb-6">
         <div className="mb-3 flex flex-row items-center gap-3">
           {profile.ensName && (
@@ -241,7 +241,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
             Bio / Description
           </Label>
           <Input
-            className="mt-2 border-border bg-surface-elevated text-foreground"
+            className="mt-2 border-border bg-background text-foreground"
             id="description"
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Tell us about yourself..."
@@ -255,7 +255,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
             Email (Optional)
           </Label>
           <Input
-            className="mt-2 border-border bg-surface-elevated text-foreground"
+            className="mt-2 border-border bg-background text-foreground"
             id="email"
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
@@ -270,7 +270,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
             Website (Optional)
           </Label>
           <Input
-            className="mt-2 border-border bg-surface-elevated text-foreground"
+            className="mt-2 border-border bg-background text-foreground"
             id="url"
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://your-website.com"
@@ -300,7 +300,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
                     key.replace("com.", "").slice(1)}
                 </Label>
                 <Input
-                  className="mt-1 border-border bg-surface-elevated text-foreground"
+                  className="mt-1 border-border bg-background text-foreground"
                   id={key}
                   onChange={(e) => handleSocialChange(key, e.target.value)}
                   placeholder={`https://${key.replace("com.", "")}.com/yourusername`}

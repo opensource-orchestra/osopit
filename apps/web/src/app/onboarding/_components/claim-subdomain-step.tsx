@@ -35,7 +35,7 @@ export function ClaimSubdomainStep({
 }: ClaimSubdomainStepProps) {
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-brand/40 bg-card/80 px-4 py-5 shadow-sm">
+      <div className="rounded-lg border border-brand/40 bg-background/80 px-4 py-5 shadow-sm">
         <p className="mb-1 font-semibold text-brand text-sm">
           ✨ You're invited to claim
         </p>
@@ -84,8 +84,8 @@ export function ClaimSubdomainStep({
 
       {isPorto && isRegistered && (
         <div className="space-y-4">
-          <div className="rounded-lg border border-success/40 bg-card/80 px-4 py-5 text-center shadow-sm">
-            <p className="mb-1 font-semibold text-sm text-success-foreground">
+          <div className="rounded-lg border border-success/40 bg-background/80 px-4 py-5 text-center shadow-sm">
+            <p className="mb-1 font-semibold text-sm text-success">
               ✅ Domain Claimed Successfully!
             </p>
             <p className="font-mono text-success text-xl">

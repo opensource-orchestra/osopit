@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, ExternalLink } from "lucide-react";
+import { Cuer } from "cuer";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
@@ -11,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSendEth } from "@/hooks/use-send-eth";
+import { formatAddress } from "@/lib/utils";
 
 type TipFormProps = {
   artistName: string;
@@ -33,8 +35,10 @@ export function TipForm({
   const { address: userAddress } = useAccount();
   const [selectedPreset, setSelectedPreset] = useState<number | null>(10);
   const [customAmount, setCustomAmount] = useState("");
+  const [copiedENS, setCopiedENS] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
 
-  const { sendEth, isPending, isSuccess, hash } = useSendEth({
+  const { sendEth, isSuccess, hash } = useSendEth({
     onSuccess: () => {
       toast.success(`Tip sent to ${artistName}!`);
     },
@@ -46,6 +50,32 @@ export function TipForm({
   const amount = customAmount || selectedPreset?.toString() || "0";
   const amountNum = Number.parseFloat(amount);
   const ethAmount = amountNum / ETH_PRICE_USD;
+
+  // EIP-681 format: ethereum:<address>@<chainId>
+  // ChainId 8453 = Base mainnet
+  const qrValue = `ethereum:${artistAddress}@8453`;
+
+  const handleCopyENS = async () => {
+    try {
+      await navigator.clipboard.writeText(ensName);
+      setCopiedENS(true);
+      toast.success("ENS name copied!");
+      setTimeout(() => setCopiedENS(false), 2000);
+    } catch (_err) {
+      toast.error("Failed to copy");
+    }
+  };
+
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(artistAddress);
+      setCopiedAddress(true);
+      toast.success("Address copied!");
+      setTimeout(() => setCopiedAddress(false), 2000);
+    } catch (_err) {
+      toast.error("Failed to copy");
+    }
+  };
 
   const handleSend = async () => {
     if (!userAddress) {
@@ -170,15 +200,65 @@ export function TipForm({
         )}
       </div>
 
-      {/* Send button */}
+      {/* QR Code Section */}
+      <div className="space-y-4">
+        <div className="flex justify-center rounded-lg bg-white p-6">
+          <Cuer color="black" size={200} value={qrValue} />
+        </div>
+
+        {/* ENS Name with copy */}
+        <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted p-3">
+          <p className="flex-1 text-center font-medium text-brand text-xs uppercase tracking-wide">
+            {ensName}
+          </p>
+          <Button
+            className="size-8 shrink-0"
+            onClick={handleCopyENS}
+            size="icon"
+            variant="ghost"
+          >
+            {copiedENS ? (
+              <Check className="size-3.5 text-success" />
+            ) : (
+              <Copy className="size-3.5" />
+            )}
+          </Button>
+        </div>
+
+        {/* Wallet Address with copy */}
+        <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted p-3">
+          <p className="flex-1 text-center font-mono text-muted-foreground text-xs">
+            {formatAddress(artistAddress, 10, 10)}
+          </p>
+          <Button
+            className="size-8 shrink-0"
+            onClick={handleCopyAddress}
+            size="icon"
+            variant="ghost"
+          >
+            {copiedAddress ? (
+              <Check className="size-3.5 text-success" />
+            ) : (
+              <Copy className="size-3.5" />
+            )}
+          </Button>
+        </div>
+
+        <p className="text-center text-muted-foreground text-xs">
+          Scan with your mobile wallet to send a tip on Base
+        </p>
+      </div>
+
+      {/* Send button (disabled) */}
       {userAddress ? (
         <Button
           className="w-full"
-          disabled={isPending || amountNum <= 0}
+          disabled={true}
           onClick={handleSend}
           size="lg"
+          variant="outline"
         >
-          {isPending ? "Sending..." : `Send $${amount} Tip`}
+          Send Tip (Coming Soon)
         </Button>
       ) : (
         <div className="space-y-3">

@@ -61,7 +61,7 @@ export function useUpdateTextRecords() {
 
       toast.info("Updating profile data...");
 
-      // Extract label from ensName (e.g., "alice" from "alice.catmisha.eth")
+      // Extract label from ensName (e.g., "alice" from "alice.osopit.eth")
       const label = input.ensName.split(".")[0];
 
       // Calculate nodeHash using ENS namehash

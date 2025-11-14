@@ -3,7 +3,6 @@
 import { Check, Moon, Palette, Sun } from "lucide-react";
 import { getColorThemeOptions } from "@/lib/theme-config";
 import { useColorTheme } from "./color-theme-provider";
-import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 const colorThemes = getColorThemeOptions();
@@ -14,9 +13,12 @@ export function ThemeSwitcher() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button size="icon" variant="outline">
+        <button
+          className="flex size-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+          type="button"
+        >
           <Palette className="size-4" />
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-56">
         <div className="space-y-4">

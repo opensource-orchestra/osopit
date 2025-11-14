@@ -8,6 +8,7 @@ import {
   StickyFilterBar,
 } from "@/app/_components/sticky-filter-bar";
 import { Card } from "@/components/ui/card";
+import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAllArtists } from "@/hooks/use-all-artists";
 import { ARTISTS_GRID_SIZE } from "@/lib/constants";
@@ -16,7 +17,7 @@ const LoadingSkeleton = () => (
   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
     {[...new Array(ARTISTS_GRID_SIZE)].map((_, i) => (
       <Card
-        className="border-border bg-card p-6"
+        className="border-border bg-background/80 p-6"
         key={`artist-skeleton-${String(i)}`}
       >
         <Skeleton className="mb-4 size-16 rounded-2xl" />
@@ -100,7 +101,7 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-[calc(100vh-42px)] bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8">
           <div className="mb-6 h-[60vh] animate-pulse rounded-lg bg-muted" />
           <div className="mb-6 h-20 animate-pulse rounded-lg bg-muted" />
@@ -111,7 +112,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[calc(100vh-42px)] bg-background">
       <a
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-brand focus:px-4 focus:py-2 focus:text-brand-foreground focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
         href="#artist-grid"
@@ -119,58 +120,52 @@ export default function Home() {
         Skip to artists
       </a>
 
-      <section className="mx-auto w-full bg-background px-4 py-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6">
-          <div className="flex flex-1 flex-col gap-6">
-            {liveArtists.length > 0 && (
-              <div className="w-full rounded-lg border border-border bg-card p-6 shadow-lg">
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="flex size-3">
-                    <span className="absolute inline-flex size-3 animate-ping rounded-full bg-live opacity-75" />
-                    <span className="relative inline-flex size-3 rounded-full bg-live" />
-                  </span>
-                  <span className="font-bold text-foreground text-lg uppercase tracking-wide">
-                    Live Now
-                  </span>
-                </div>
-                <div className="h-[60vh] max-h-[700px] min-h-[400px]">
-                  <LivestreamCarousel broadcasts={liveArtists} />
-                </div>
+      <Container>
+        <div className="flex h-full flex-1 flex-col gap-6">
+          {liveArtists.length > 0 && (
+            <div className="w-full">
+              <div className="mb-3 flex items-center gap-2 px-4 lg:px-0">
+                <span className="flex size-3">
+                  <span className="absolute inline-flex size-3 animate-ping rounded-full bg-live opacity-75" />
+                  <span className="relative inline-flex size-3 rounded-full bg-live" />
+                </span>
+                <span className="font-bold text-foreground text-lg uppercase tracking-wide">
+                  Live Now
+                </span>
               </div>
-            )}
-
-            <section className="w-full rounded-lg border border-border bg-card p-6 shadow-md">
-              <h2 className="px-4 font-bold text-2xl text-foreground">
-                Artists
-              </h2>
-
-              <StickyFilterBar
-                filter={filter}
-                liveCount={liveCount}
-                offlineCount={offlineCount}
-                searchQuery={searchQuery}
-                setFilter={setFilter}
-                setSearchQuery={setSearchQuery}
-                totalArtists={totalArtists}
-              />
-
-              <div className="mx-auto w-full px-4" id="artist-grid">
-                {filteredArtists.length === 0 && renderEmptyState()}
-                {filteredArtists.length > 0 && (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                    {filteredArtists.map((artist) => (
-                      <ArtistCard
-                        artist={artist}
-                        key={artist.subdomain?.name ?? ""}
-                      />
-                    ))}
-                  </div>
-                )}
+              <div className="max-h-[700px] min-h-[400px]">
+                <LivestreamCarousel broadcasts={liveArtists} />
               </div>
-            </section>
-          </div>
+            </div>
+          )}
+
+          <section className="w-full">
+            <StickyFilterBar
+              filter={filter}
+              liveCount={liveCount}
+              offlineCount={offlineCount}
+              searchQuery={searchQuery}
+              setFilter={setFilter}
+              setSearchQuery={setSearchQuery}
+              totalArtists={totalArtists}
+            />
+
+            <div className="mx-auto w-full" id="artist-grid">
+              {filteredArtists.length === 0 && renderEmptyState()}
+              {filteredArtists.length > 0 && (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                  {filteredArtists.map((artist) => (
+                    <ArtistCard
+                      artist={artist}
+                      key={artist.subdomain?.name ?? ""}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
         </div>
-      </section>
+      </Container>
     </div>
   );
 }
